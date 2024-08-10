@@ -2,64 +2,86 @@ package com.dicoding.tourismapp.core.data
 
 import android.annotation.SuppressLint
 import com.dicoding.tourismapp.core.data.source.remote.network.ApiResponse
-
-import io.reactivex.BackpressureStrategy
-import io.reactivex.Flowable
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.schedulers.Schedulers
-import io.reactivex.subjects.PublishSubject
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 
 @SuppressLint("CheckResult")
 abstract class NetworkBoundResource<ResultType, RequestType>{
 
-    private val result = PublishSubject.create<Resource<ResultType>>()
-    private val mCompositeDisposable = CompositeDisposable()
-
-    init {
-        val dbSource = loadFromDB()
-        val db = dbSource
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .take(1)
-            .subscribe { value ->
-                dbSource.unsubscribeOn(Schedulers.io())
-                if (shouldFetch(value)) {
-                    fetchFromNetwork()
-                } else {
-                    result.onNext(Resource.Success(value))
+    private val result : Flow<Resource<ResultType>> = flow {
+        emit(Resource.Loading())
+        val dbSource = loadFromDB().first()
+        if (shouldFetch(dbSource)) {
+            emit(Resource.Loading())
+            when (val apiResponse = createCall().first()) {
+                is ApiResponse.Success -> {
+                    saveCallResult(apiResponse.data)
+                    emitAll(loadFromDB().map { Resource.Success(it) })
+                }
+                is ApiResponse.Empty -> {
+                    emitAll(
+                        loadFromDB().map { Resource.Success(it) })
+                }
+                is ApiResponse.Error -> {
+                    onFetchFailed()
+                    emit(Resource.Error(apiResponse.errorMessage))
                 }
             }
-        mCompositeDisposable.add(db)
-
-        /*result.value = Resource.Loading(null)
-
-        @Suppress("LeakingThis")
-        val dbSource = loadFromDB()
-
-        result.addSource(dbSource) { data ->
-            result.removeSource(dbSource)
-            if (shouldFetch(data)) {
-                fetchFromNetwork(dbSource)
-            } else {
-                result.addSource(dbSource) { newData ->
-                    result.value = Resource.Success(newData)
-                }
-            }
-        }*/
+        } else {
+            emitAll(loadFromDB().map { Resource.Success(it)})
+        }
     }
+//    private val mCompositeDisposable = CompositeDisposable()
+//
+//    init {
+//        val dbSource = loadFromDB()
+//        val db = dbSource
+//            .subscribeOn(Schedulers.io())
+//            .observeOn(AndroidSchedulers.mainThread())
+//            .take(1)
+//            .subscribe { value ->
+//                dbSource.unsubscribeOn(Schedulers.io())
+//                if (shouldFetch(value)) {
+//                    fetchFromNetwork()
+//                } else {
+//                    result.onNext(Resource.Success(value))
+//                }
+//            }
+//        mCompositeDisposable.add(db)
+//
+//        /*result.value = Resource.Loading(null)
+//
+//        @Suppress("LeakingThis")
+//        val dbSource = loadFromDB()
+//
+//        result.addSource(dbSource) { data ->
+//            result.removeSource(dbSource)
+//            if (shouldFetch(data)) {
+//                fetchFromNetwork(dbSource)
+//            } else {
+//                result.addSource(dbSource) { newData ->
+//                    result.value = Resource.Success(newData)
+//                }
+//            }
+//        }*/
+//    }
 
     protected open fun onFetchFailed() {}
 
-    protected abstract fun loadFromDB(): Flowable<ResultType>
+    protected abstract fun loadFromDB(): Flow<ResultType>
 
     protected abstract fun shouldFetch(data: ResultType?): Boolean
 
-    protected abstract fun createCall(): Flowable<ApiResponse<RequestType>>
+    protected abstract fun createCall(): Flow<ApiResponse<RequestType>>
 
     protected abstract fun saveCallResult(data: RequestType)
 
-    @SuppressLint("CheckResult")
+    fun asFlow(): Flow<Resource<ResultType>> = result
+
+    /*@SuppressLint("CheckResult")
     private fun fetchFromNetwork() {
 
         val apiResponse = createCall()
@@ -133,10 +155,10 @@ abstract class NetworkBoundResource<ResultType, RequestType>{
 //                }
 //            }
 //        }
-    }
+    }*/
 
-    fun asFlowable(): Flowable<Resource<ResultType>> =
-        result.toFlowable(BackpressureStrategy.BUFFER)
+    /*fun asFlowable(): Flowable<Resource<ResultType>> =
+        result.toFlowable(BackpressureStrategy.BUFFER)*/
 
 //    fun asLiveData(): LiveData<Resource<ResultType>> = result
 }

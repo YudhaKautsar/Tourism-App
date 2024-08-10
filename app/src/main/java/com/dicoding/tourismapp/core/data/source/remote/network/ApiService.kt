@@ -7,5 +7,6 @@ import retrofit2.http.GET
 
 interface ApiService {
     @GET("list")
-    fun getList(): Flowable<ListTourismResponse>
+    suspend fun getList(): ListTourismResponse // With Coroutine Flow
+//    fun getList(): Flowable<ListTourismResponse> // With Flow RxJava
 }
