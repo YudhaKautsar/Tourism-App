@@ -75,9 +75,9 @@ abstract class NetworkBoundResource<ResultType, RequestType>{
 
     protected abstract fun shouldFetch(data: ResultType?): Boolean
 
-    protected abstract fun createCall(): Flow<ApiResponse<RequestType>>
+    protected abstract suspend fun createCall(): Flow<ApiResponse<RequestType>>
 
-    protected abstract fun saveCallResult(data: RequestType)
+    protected abstract suspend fun saveCallResult(data: RequestType)
 
     fun asFlow(): Flow<Resource<ResultType>> = result
 
