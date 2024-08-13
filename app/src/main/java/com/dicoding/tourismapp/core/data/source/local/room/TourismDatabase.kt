@@ -17,17 +17,17 @@ abstract class TourismDatabase : RoomDatabase() {
         @Volatile
         private var INSTANCE: TourismDatabase? = null
 
-        fun getInstance(context: Context): TourismDatabase =
-            INSTANCE ?: synchronized(this) {
-            val instance = Room.databaseBuilder(
-                context.applicationContext,
-                TourismDatabase::class.java,
-                "Tourism.db"
-            )
-                .fallbackToDestructiveMigration()
-                .build()
-            INSTANCE = instance
-            instance
-        }
+//        fun getInstance(context: Context): TourismDatabase =
+//            INSTANCE ?: synchronized(this) {
+//            val instance = Room.databaseBuilder(
+//                context.applicationContext,
+//                TourismDatabase::class.java,
+//                "Tourism.db"
+//            )
+//                .fallbackToDestructiveMigration()
+//                .build()
+//            INSTANCE = instance
+//            instance
+//        }
     }
 }

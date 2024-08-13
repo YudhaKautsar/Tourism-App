@@ -21,15 +21,15 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
-class RemoteDataSource private constructor(private val apiService: ApiService) {
+class RemoteDataSource(private val apiService: ApiService) {
     companion object {
         @Volatile
         private var instance: RemoteDataSource? = null
 
-        fun getInstance(service: ApiService): RemoteDataSource =
-            instance ?: synchronized(this) {
-                instance ?: RemoteDataSource(service)
-            }
+//        fun getInstance(service: ApiService): RemoteDataSource =
+//            instance ?: synchronized(this) {
+//                instance ?: RemoteDataSource(service)
+//            }
     }
 
     @SuppressLint("CheckResult")
