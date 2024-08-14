@@ -13,9 +13,9 @@ abstract class TourismDatabase : RoomDatabase() {
 
     abstract fun tourismDao(): TourismDao
 
-    companion object {
-        @Volatile
-        private var INSTANCE: TourismDatabase? = null
+//    companion object {
+//        @Volatile
+//        private var INSTANCE: TourismDatabase? = null
 
 //        fun getInstance(context: Context): TourismDatabase =
 //            INSTANCE ?: synchronized(this) {
@@ -29,5 +29,5 @@ abstract class TourismDatabase : RoomDatabase() {
 //            INSTANCE = instance
 //            instance
 //        }
-    }
+//    }
 }

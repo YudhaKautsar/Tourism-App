@@ -13,16 +13,19 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class TourismRepository(
+@Singleton
+class TourismRepository @Inject constructor(
     private val remoteDataSource: RemoteDataSource,
     private val localDataSource: LocalDataSource,
     private val appExecutors: AppExecutors
 ) : ITourismRepository {
 
-    companion object {
-        @Volatile
-        private var instance: TourismRepository? = null
+//    companion object {
+//        @Volatile
+//        private var instance: TourismRepository? = null
 
 //        fun getInstance(
 //            remoteData: RemoteDataSource,
@@ -32,7 +35,7 @@ class TourismRepository(
 //            instance ?: synchronized(this) {
 //                instance ?: TourismRepository(remoteData, localData, appExecutors)
 //            }
-    }
+//    }
 
     override fun getAllTourism(): Flow<Resource<List<Tourism>>> =
         object : NetworkBoundResource<List<Tourism>, List<TourismResponse>>() {
